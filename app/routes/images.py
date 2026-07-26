@@ -117,7 +117,9 @@ async def get_job_results(request: Request, job_id: int, db: Session = Depends(g
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-    return templates.TemplateResponse("results.html", {"request": request, "job": job})
+    
+    # Explicitly naming 'request', 'name', and using 'context' to fix the unhashable dict error
+    return templates.TemplateResponse(request=request, name="results.html", context={"job": job})
 
 @router.get("/download/{job_id}", name="download_zip")
 async def download_job_images_as_zip(job_id: int, db: Session = Depends(get_db)):
@@ -136,4 +138,3 @@ async def download_job_images_as_zip(job_id: int, db: Session = Depends(get_db))
     
     headers = {'Content-Disposition': f'attachment; filename="job_{job_id}_{job.query}.zip"'}
     return StreamingResponse(zip_buffer, media_type="application/x-zip-compressed", headers=headers)
-

@@ -1,31 +1,33 @@
+# --- FIX: Move imports to the top level (Main Thread) ---
+import torch
+from transformers import CLIPProcessor, CLIPModel
+
 from PIL import Image
 import os
 from app.core.config import settings
 
-# --- NOTICE: torch and transformers are NO LONGER IMPORTED HERE ---
+
 
 MODEL_NAME = "openai/clip-vit-base-patch32"
 model = None
 processor = None
-device = None # Will be set when the model is loaded
+device = None 
 
 def _load_model():
     """
-    Loads the AI model and its libraries into memory.
-    This function will only be called once, the first time it's needed.
+    Loads the AI model weights into memory.
     """
     global model, processor, device
     if model is not None:
         return
 
-    print("🤖 Importing AI libraries and loading CLIP model...")
+    print("🤖 Loading CLIP model into memory...")
     try:
-        # --- THIS IS THE FIX ---
-        # We import the heavy libraries only when this function is first called.
-        import torch
-        from transformers import CLIPProcessor, CLIPModel
-
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        # Optional: Add specific support for Mac Apple Silicon (MPS)
+        if torch.backends.mps.is_available():
+            device = "mps"
+
         model = CLIPModel.from_pretrained(MODEL_NAME).to(device)
         processor = CLIPProcessor.from_pretrained(MODEL_NAME)
         print(f"✅ CLIP model loaded successfully on {device}.")
@@ -39,19 +41,14 @@ def filter_images(image_paths: list[str], query: str, job_id: int) -> list[str]:
     """
     Uses the CLIP model to filter images based on their relevance to a text query.
     """
-    # Lazy-load the model and libraries on the first run.
     _load_model()
     
     if model == "failed" or not image_paths:
         return image_paths
 
-    # We need to import torch here again to use torch.no_grad()
-    import torch
-
     print(f"[JOB {job_id}] 🧠 Starting AI filtering for {len(image_paths)} images...")
     
     try:
-        # Process in batches to conserve memory
         BATCH_SIZE = 16
         relevant_paths = []
         for i in range(0, len(image_paths), BATCH_SIZE):

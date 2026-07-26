@@ -1,12 +1,6 @@
-# Ignore the Python virtual environment
-venv/
-
-# Ignore the database file, but keep downloads folder
-jobs.db
-
-# Ignore secret environment variables
 .env
-
-# Ignore Python cache files
+venv/
 __pycache__/
-*.pyc
+jobs.db
+data/
+*.zip
