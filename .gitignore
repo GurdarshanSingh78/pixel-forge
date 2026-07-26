@@ -4,3 +4,7 @@ __pycache__/
 jobs.db
 data/
 *.zip
+downloads/
+data/
+*.db
+*.zip
