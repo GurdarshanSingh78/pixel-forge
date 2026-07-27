@@ -7,8 +7,6 @@ sqlalchemy
 requests
 Pillow
 imagehash
-transformers
-torch
 email-validator
 fastapi-mail
 pexels-api
