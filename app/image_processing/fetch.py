@@ -38,7 +38,8 @@ def fetch_images(query: str, num_to_fetch: int, job_id: int) -> list[str]:
             photos_to_get.extend(photos)
             page += 1
         
-        image_urls = [p.original for p in photos_to_get]
+        # --- FIX: Changed p.original to p.large2x to prevent DecompressionBomb memory crashes ---
+        image_urls = [p.large2x for p in photos_to_get]
         print(f"[JOB {job_id}][INFO] Found {len(image_urls)} potential image URLs from Pexels.")
     except Exception as e:
         print(f"[JOB {job_id}][ERROR] Pexels API search failed: {e}")
@@ -71,7 +72,7 @@ def fetch_images(query: str, num_to_fetch: int, job_id: int) -> list[str]:
             
             downloaded_paths.append(str(filepath))
             
-            # --- THIS IS THE FIX ---
+            # --- API Rate Limiting Fix ---
             # Add a 0.5-second pause to be respectful to the API
             time.sleep(0.5)
 
@@ -81,4 +82,3 @@ def fetch_images(query: str, num_to_fetch: int, job_id: int) -> list[str]:
             
     print(f"[JOB {job_id}][INFO] Download phase complete. Successfully saved {len(downloaded_paths)} images.")
     return downloaded_paths
-
